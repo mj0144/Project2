@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ <mapper namespace="com.mvc.counsel.info.dao.CounselReplyMapper">
+ 
+ 	<!-- 댓글 등록 -->
+ 	<insert id="replyCreate" parameterType="com.mvc.counsel.info.vo.CounselReplyVO">
+ 		insert into COUNSEL_REPLY(seq_counsel, reply_content, reply_date) values(#{seq_counsel}, #{reply_content}, now())
+ 	</insert>
+ 	
+ 	<!-- 댓글 목록 -->
+ 	<select id="replyList" resultType="com.mvc.counsel.info.vo.CounselReplyVO" parameterType="int">
+		select reply_content, reply_date 
+		from COUNSEL_REPLY 
+		WHERE seq_counsel =#{seq_counsel} 
+		ORDER by reply_date desc
+	</select>
+	
+ </mapper>
+  
+  

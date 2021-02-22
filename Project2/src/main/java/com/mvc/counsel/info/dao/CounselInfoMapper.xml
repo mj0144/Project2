@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mvc.counsel.info.dao.CounselInfoMapper">
+
+	<!-- 게시글 작성 -->
+	<insert id="counselInfoCreate"
+		parameterType="com.mvc.counsel.info.vo.CounselInfoVO">
+		insert into COUNSEL_INFO(counsel_title, counsel_content,
+		counsel_date, counsel_userId, counsel_userId_motify) values
+		(#{counsel_title}, #{counsel_content}, now(), #{counsel_userId},
+		#{counsel_userId})
+	</insert>
+	
+	<!-- 게시글 목록 -->
+	<select id="counselInfoList"
+		resultType="com.mvc.counsel.info.vo.CounselInfoVO">
+		select * from COUNSEL_INFO ORDER BY counsel_date desc
+	</select>
+	
+	<!-- 게시글 자세히 보기 -->
+	<select id="counselInfoDetail" parameterType="int"
+		resultType="com.mvc.counsel.info.vo.CounselInfoVO">
+		select * from COUNSEL_INFO where seq_counsel=#{seq_counsel}
+	</select>
+	
+	<!-- 게시글 수정 -->
+	<update id="counselInfoUpdate"
+		parameterType="com.mvc.counsel.info.vo.CounselInfoVO">
+		update COUNSEL_INFO set counsel_title=#{counsel_title},
+		counsel_content=#{counsel_content} where
+		seq_counsel=#{seq_counsel}
+	</update>
+	
+	<!-- 게시글 삭제 -->
+	<delete id="counselInfoDelete" parameterType="int">
+		delete from
+		COUNSEL_INFO where seq_counsel=#{seq_counsel}
+	</delete>
+	
+	<!-- 글쓴이 검색 -->
+	<select id="counselOneUserId" resultType="String" parameterType="int">
+		select counsel_userId from counsel_info where seq_counsel=#{seq_counsel}
+	</select>
+	
+	
+		<!-- 검색 searchOption=all- 제목+내용, title-제목, content-내용 -->
+	<select id="searchList" parameterType="hashMap"
+		resultType="com.mvc.counsel.info.vo.CounselInfoVO">
+		select * from COUNSEL_INFO
+		<choose>
+			<when test="searchOption eq 'all'.toString()">
+				where counsel_title like
+				concat('%',#{searchQuery},'%')
+				OR counsel_content like
+				concat('%',#{searchQuery},'%')
+			</when>
+			<when test="searchOption eq 'title'.toString()">
+				where counsel_title like
+				concat('%',#{searchQuery},'%')
+			</when>
+			<when test="searchOption eq 'content'.toString()">
+				where counsel_content like
+				concat('%',#{searchQuery},'%')
+			</when>
+		</choose>
+		ORDER BY counsel_date desc
+	</select>
+
+	<!-- 비밀글 추가 -->
+	<insert id="counselLockAdd"
+		parameterType="com.mvc.counsel.info.vo.CounselLockVO">
+		insert into COUNSEL_LOCK values((SELECT
+		LAST_INSERT_ID()), #{lockPassword})
+	</insert>
+
+	<!-- 비밀글 목록 -->
+	<select id="counselLockList"
+		resultType="com.mvc.counsel.info.vo.CounselLockVO">
+		select * from COUNSEL_LOCK
+	</select>
+	
+	<!-- 비밀글 체크 -->
+	<select id="accessLock" parameterType="com.mvc.counsel.info.vo.CounselLockVO" resultType="int">
+		select count(*) from COUNSEL_LOCK where seq_counsel=#{seq_counsel} and lock_password=#{lockPassword}
+	</select>
+
+</mapper>

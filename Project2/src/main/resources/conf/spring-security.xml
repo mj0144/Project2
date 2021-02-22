@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+	xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+	<!-- 권한없이 페이지 이동시, 접근불가 페이지 핸들링-->
+	<beans:bean id="accessDeniedPage" class="com.mvc.counsel.security.AccessDeniedPage"/>
+
+	<!-- springEl 사용하기 위해 user-expressions 설정. -->
+	<http use-expressions="true">
+		<!-- url패턴에 대한 권한 -->
+		<intercept-url pattern="/" access="permitAll"/>
+		<intercept-url pattern="/counsel/user/**" access="permitAll"/>		
+		<intercept-url pattern="/counsel/**" access="hasAnyRole('user', 'admin')" />		
+ 		<intercept-url pattern="/counsel/admin/**" access="hasRole('admin')"/>
+		
+		<!-- 권한이 거부되었을 때, 이동할 에러페이지. 단, 인증이 된 사용자일 경우에만. -->
+		<access-denied-handler ref="accessDeniedPage" />
+		
+		<!-- 로그인 폼에 대한 정보 -->
+		<form-login username-parameter="id"
+			password-parameter="password" login-page="/"
+			login-processing-url="/counsel/user/login"
+			authentication-failure-url="/"
+			default-target-url="/counsel/list" />
+		
+		<!-- 로그아웃에 관한 정보 -->
+		<logout logout-url="/counsel/user/logout"
+		logout-success-url="/"/>
+		
+	</http>
+	
+	<!-- AuthenticationProvider, DetailService 커스텀 클래스 빈으로 등록 -->
+	<beans:bean id="counselUserAuthenticationProvider" class="com.mvc.counsel.security.CounselUserAuthenticationProvider"/>
+	<beans:bean id="counselUserDetailService" class="com.mvc.counsel.user.service.CounselUserDetailService"/>
+		
+	<!-- SHA256 암호화 사용. default : sha-1, SHA256 사용시, 생성자 인수 필요. -->
+	<beans:bean id="shaPasswordEncoder" class="org.springframework.security.authentication.encoding.ShaPasswordEncoder">
+  		<beans:constructor-arg name="strength" value="256"/>
+	</beans:bean>
+		
+	<!-- AuthenticationProvider 커스텀할 클래스 지정. & UserDetailService 커스텀할 클래스 지정. -->
+ 	<authentication-manager>
+		<authentication-provider ref="counselUserAuthenticationProvider" />
+		<authentication-provider user-service-ref="counselUserDetailService">
+			<password-encoder ref="shaPasswordEncoder" /> <!-- 비밀번호 암호화 -->
+		</authentication-provider>
+	</authentication-manager> 
+	
+	
+	<!-- 에러 메세지 한글 설정. -->
+	<beans:bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<beans:property name="basenames">
+			<beans:list>
+				<beans:value>/WEB-INF/msg/security_msg</beans:value>
+			</beans:list>
+		</beans:property>
+		<beans:property name="defaultEncoding" value="UTF-8"/>
+	</beans:bean>
+
+</beans:beans>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mvc.counsel.info.dao.SchedulingMapper">
+
+	<!-- 개시글 목록 -->
+	<select id="counselList"
+		resultType="com.mvc.counsel.info.vo.CounselInfoVO">
+		select seq_counsel, counsel_title,
+		counsel_content from
+		COUNSEL_INFO
+	</select>
+
+	<!-- 마스킹 처리된 게시글내용 업데이트 -->
+	<update id="changeWordUpdate"
+		parameterType="com.mvc.counsel.info.vo.CounselInfoVO">
+		update COUNSEL_INFO set counsel_title=#{counsel_title},
+		counsel_content=#{counsel_content} where seq_counsel=#{seq_counsel}
+	</update>
+
+	<!-- 특정 시간 지난 게시글 목록 -->
+	<select id="daysPassSearch"
+		resultType="com.mvc.counsel.info.vo.CounselInfoVO" parameterType="int">
+		SELECT * FROM COUNSEL_INFO WHERE counsel_date <![CDATA[<]]>
+		DATE_ADD(SYSDATE(), INTERVAL #{day} DAY)
+	</select>
+
+	<!-- 특정 시간 지난 게시글 삭제 -->
+	<delete id="daysPassDelete" parameterType="java.util.List">
+		delete from COUNSEL_INFO where seq_counsel in
+		<foreach collection="list" item="item" open="(" close=")"
+			separator=",">
+			#{item.seq_counsel}
+		</foreach>
+
+	</delete>
+	
+</mapper>

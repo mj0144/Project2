@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/task
+                                         http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+
+
+	<!-- 동작시킬 클래스 비속어 클래스 -->
+	<bean name="jobClassSlang"
+		class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass"
+			value="com.mvc.counsel.info.scheduler.SlangScheduler" />
+		<property name="applicationContextJobDataKey"
+			value="applicationContext" />
+	</bean>
+	<!-- 동작시킬 클래스 날짜지난 게시글 삭제 클래스 -->
+<!-- 	<bean name="jobClassDelete"
+		class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass"
+			value="com.mvc.counsel.info.scheduler.DeleteScheduler" />
+		<property name="applicationContextJobDataKey"
+			value="applicationContext" />
+	</bean> -->
+
+
+	<!-- 반복작업 정의. 비속어 스케줄링 -->
+	<bean id="slangCronTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<!--동작시킬 클래스 주입 -->
+		<property name="jobDetail" ref="jobClassSlang" />
+
+		<!-- 주기설정 10초마다 -->
+		<!-- <property name="cronExpression" value="0/10 * * ? * *" /> -->
+		<!-- 3분 마다 0 0/3 * 1/1 * ? * -->
+		<!-- <property name="cronExpression" value="0 0/3 * 1/1 * ? *" /> -->
+		<property name="cronExpression" value="0 0/3 * 1/1 * ? *" /> 
+				
+	</bean>
+	
+	<!-- 반복작업 정의. 날짜지난 게시물 삭제 -->
+<!-- 	<bean id="deleteCronTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+
+		동작시킬 클래스 주입
+		<property name="jobDetail" ref="jobClassDelete" />
+		주기설정 매일 8시
+		<property name="cronExpression" value="0/10 * * ? * *" />
+	</bean> -->
+
+
+
+	<bean
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<!-- 앞에서 설정한 트리거 등록. -->
+		<property name="triggers">
+			<list>
+				<ref bean="slangCronTrigger" />
+				<!-- <ref bean="deleteCronTrigger" /> -->
+			</list>
+		</property>
+	</bean>
+
+</beans>
